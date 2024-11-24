@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Currency Converter</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+
+        
+        .container {
+            width: 90%;
+            max-width: 400px;
+            background-color: #4fddf0;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            font-size: 34px;
+            color: black;
+        }
+
+        p {
+            margin-bottom: 10px;
+            font-size: 18px;
+            color: black;
+        }
+
+        
+        input{
+            width: 98%;
+            height: 35px;
+            background-color: white;
+            color: black;
+        }
+        select {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 5px;
+            border: none;
+            font-size: 16px;
+            background-color: white;
+            color: black;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 5px;
+            border: none;
+            font-size: 18px;
+            background-color: rgb(61, 61, 240);
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: rgb(17, 150, 190);
+        }
+
+        
+        #display {
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+            color: rgb(32, 32, 32);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Currency Converter</h1>
+        <p>Amount</p>
+        <input id="Amount" class="amount" type="number" placeholder="Enter amount">
+        <p>From</p>
+        <select class="from" id="fromCurrency">
+            
+        </select>
+
+        <p>To</p>
+        <select class="to" id="toCurrency">
+            
+        </select><br><br>
+
+        <button id="convertButton">Convert</button>
+
+        <div id="display"></div>
+    </div>
+
+    <script>
+        const apiKey = '1ad13099ca854bfebb8f4b9bbeb843b7';
+        const apiUrl = 'https://openexchangerates.org/api/latest.json';
+
+        let rates = {}; //stores the fetched rates
+
+        async function fetchCurrencies() {
+            try {
+                const response = await fetch(`${apiUrl}?app_id=${apiKey}`);
+                const data = await response.json();
+                rates = data.rates;
+
+                const fromSelect = document.getElementById("fromCurrency");
+                const toSelect = document.getElementById("toCurrency");
+
+                Object.keys(rates).forEach(currency => {
+                    const option = document.createElement("option");
+                    option.value = currency;
+                    option.textContent = currency;
+                    fromSelect.appendChild(option);
+                    toSelect.appendChild(option.cloneNode(true));
+                });
+
+            } catch (error) {
+                console.error('Error fetching currency data:', error);
+                alert("Failed to load currency data. Please try again later.");
+            }
+        }
+
+        async function convertCurrency() {
+            const amount = document.getElementById('Amount').value;
+            const fromCurrency = document.getElementById('fromCurrency').value;
+            const toCurrency = document.getElementById('toCurrency').value;
+
+            if (!amount || !fromCurrency || !toCurrency) {
+                alert("Please fill in all fields.");
+                return;
+            }
+
+            try {
+                const rateFrom = rates[fromCurrency];
+                const rateTo = rates[toCurrency];
+
+                const conversionRate = rateTo / rateFrom;
+                const result = (amount * conversionRate).toFixed(2);
+
+                document.getElementById("display").textContent = `${amount} ${fromCurrency} = ${result} ${toCurrency}`;
+
+            } catch (error) {
+                console.error('Error during conversion:', error);
+                alert("Error during conversion. Please try again later.");
+            }
+        }
+
+        document.getElementById("convertButton").addEventListener("click", convertCurrency);
+
+        fetchCurrencies();
+    </script>
+</body>
+
+</html>
